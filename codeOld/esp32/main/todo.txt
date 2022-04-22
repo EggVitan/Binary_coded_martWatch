@@ -1,0 +1,13 @@
+
+//1) finish PCB 
+2) finish 3d model
+//3) digitalWrite if im going for io expansion
+4) ULP
+5) Storage LIB
+6) low power left notification
+6) password managment with bloutooth
+//7) Cleanup code (use header files)
+8) Error codes
+9) Ad error managment to more places
+10) everything wifi hacker
+11) everything bloutooth hacker

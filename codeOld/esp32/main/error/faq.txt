@@ -1,0 +1,44 @@
+errror:
+
+	blink 3 times fast
+
+LED:
+
+HL	HR	ML	MR
+
+HL	HR	ML	MR
+
+HL	HR	ML	MR
+
+HL	HR	ML	MR
+
+HL = ERROR CODE 
+
+HR =
+	Wierless
+
+	i2c
+
+	SPI
+
+	Software
+
+Wierless:
+	Wifi not password
+	Wifi password
+	Bloutooth not password
+	Bloutooth password
+
+i2c:
+	RTC
+	LED H
+	LED M
+	Critical
+
+SPI:
+	Key
+	content
+	pointers
+	Critical
+
+Software:

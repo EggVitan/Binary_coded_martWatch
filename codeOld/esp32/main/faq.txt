@@ -1,0 +1,237 @@
+
+
+b1: cycle through -> calendar -> temperature -> wifiSet -> bloutoothSet
+						|			|				|			|
+b2 select_______________|___________|_______________|___________|
+
+b1 cycle (wifi) -> wifi site ->hotspot -> wifi jammer
+
+b1 cycle (bloutooth) -> bluetooth connect ->hotspot -> bluetooth jammer -> bluetooth HID
+
+b2 cycle (from home) -> password begin wifi -> password begin bloutooth
+
+password begin wifi: b1 press -> current wifi. b2 press -> custom wifi
+
+bluetooth: password req? time data? 
+wifi: password req? time data? file data (do something fun)?
+
+		B1 = wifi jammer, dubbelpress: wifi hotspot, longpress: wifi site
+		B2 = bluetooth jammer, dubbelpress: bluetooth hotspot, longpress: bluetooth connect.
+		b3 = calendar -> temperature, 
+		b4 = bluetooth hid, connect ? prewritten script from wifi B1 site : setup connect as hid.
+		bluetooth: password req? time data? 
+		wifi: password req? time data? file data (do something fun)?
+
+
+
+kalendar:
+	?	M	D	D
+	?	M	D	DOW
+	?	M	D	DOW
+	?	M	D	DOW
+
+	? = dont know yet
+
+	M = month in num.
+
+	D = daiet (5 bits = 31 max)
+
+	DOW = Day of weak 
+
+password managment:
+
+	all password stored on pcb memory is encypted with aes-128 encryption algorithm, the key is stored on esp32 built in memory.
+
+	When a new device reqvest a password. the klock display a new key
+	(2 char at time, 8 sites). The key is stored on the watch aswell as
+	a unique identifier/int that is wierlessly transfered to the device.
+
+Data echange:
+	
+	Device:
+	1) request type:
+	8 bits				8 bits							8bits							ENCRYPTED				8bits
+	Device identifier	-> 0x00 ( password)				-> 8bit what next data is	-> identifier data (string)	-> EOT
+	Device identifier	-> 0x01 ( Secure note)			-> 8bit what next data is	-> identifier data (string)	-> EOT
+	Device identifier	-> 0x02 ( Adress)				-> 8bit what next data is	-> identifier data (string)	-> EOT
+	Device identifier	-> 0x03 ( Paymentcard)			-> 8bit what next data is	-> identifier data (string)	-> EOT
+	Device identifier	-> 0x04 ( Gift card)			-> 8bit what next data is	-> identifier data (string)	-> EOT
+	Device identifier	-> 0x05 ( Bankacount)			-> 8bit what next data is	-> identifier data (string)	-> EOT
+	Device identifier	-> 0x06 ( NOT IN USE)			-> 8bit what next data is	-> identifier data (string)	-> EOT
+	Device identifier	-> 0x07 ( NOT IN USE)			-> 8bit what next data is	-> identifier data (string)	-> EOT
+	Device identifier	-> 0x08 ( Save New Data)		-> Data string see storage	-> EOT
+	Device identifier	-> 0x09 ( Change Data)			-> identifier NAME (string)	-> FS	->	Data string see storage -> EOT
+	Device identifier	-> 0x0A ( Possibilityrequest)	-> What abow (0xFF for all)	->	follow up type(8bit)	->	identifier data (string)	-> EOT
+	NULL 8 bits			-> 0x0B (Add device)			-> EOT
+	Device identifier	-> 0x0C (change device key)		-> old Device identifier	-> 
+	Device identifier 	-> 0x0D (Delete device key)		-> Device identifier to delete -> EOT
+	Device identifier 	-> 0x0E (ERROR-report)			-> EOT
+	
+
+	Watch:
+	User write in password
+	
+	0x00 - 0x07: If identifier data only allow for one: Send new data
+				else: Send possible answer 
+
+	0x08:	If data makes sens: Ad new data
+			Else: ERROR wrong data, send error message
+
+	0x09:	If data to change exist and is of only one possibility and data makes sense: change data
+			else: send data that he might meant or error meessage.
+
+	0x0A:	Send data encypted
+	
+	Security risk (hellow world thing=)?
+	0x0B:	Show the new key on LED, when b1 button pressed it sends the device identifier followed by Hello World! encrypted, the device decrypts it to check if the key is correct.
+
+	0x0C: Its old password gets deleted,  the new key shows on LED, when b1 button pressed it sends the device identifier followed by Hello World! encrypted, the device decrypts it to check if the key is correct. 
+
+	Device identifier-> 0x08 ( Possibilityrequest)	-> 8bit what next data is -> identifier data (string)-> EOT
+_________________________________________________________________
+
+
+folders:
+file name != NULL
+
+password:
+	Search file (return file name (that is random(16 bit)))
+	password file
+		16 bit (converted to char) long name
+		(NULL SEPERATOR)	(group encrypted)
+		0x01 - name
+		0x02 - URL
+		0x03 - username
+		0x04 - Email
+		0x05 - password
+		0xFD - note
+		0xFE - image
+		0xFF - sound recording mp3
+
+Secure note:
+	Search file (return file name (that is random(16 bit)))
+	Secure note file
+		16 bit (converted to char) long name
+		(NULL SEPERATOR)	(group encrypted)
+		0x01 - name
+		0xFD - note
+		0xFE - image
+		0xFF - sound recording mp3
+
+Adress:
+	Search file (return file name (that is random(16 bit)))
+	Address file
+		16 bit (converted to char) long name
+		(NULL SEPERATOR)	(group encrypted)
+		0x01 - first Name
+		0x02 - middle Name
+		0x03 - last Name
+		0x04 -> 0x0F - addres x
+		0xA0 - City/town
+		0xA1 - country
+		0xA2 - State
+		0xA3 - Zip/ Postal code
+		0xA4 - Company
+		0xA5 - Birthday
+		0xA6 - Email Address
+		0xA7 - Phone
+		0xFD - note
+		0xFE - image
+		0xFF - sound recording
+
+Payment card:
+	Search file (return file name (that is random(16 bit)))
+	password file
+		16 bit (converted to char) long name
+		(NULL SEPERATOR)	(group encrypted)
+		0x01 -	Name
+		0x02 -	name on card
+		0x03 -	type
+		0x04 -	number
+		0x05 -	security code
+		0x06 -	Start Date
+		0x07 -	Expiration Date
+		0x08 -	Bank
+		0x09 -	buy code
+		0xFD - note
+		0xFE - image
+		0xFF - sound recording
+
+Gift card:
+	Search file (return file name (that is random(16 bit)))
+	password file
+		16 bit (converted to char) long name
+		(NULL SEPERATOR)	(group encrypted)
+		0x01 -	Name
+		0x02 -	String card code
+		0x03 -	Integer card code
+		0x04 -	D1
+		0x05 -	D2...
+		0x06 -	...
+		0xFD - note
+		0xFE - image
+		0xFF - sound recording
+
+Bank account:
+	Search file (return file name (that is random(16 bit)))
+	password file
+		16 bit (converted to char) long name
+		0x01 -	Name
+		0x02 -	Bank name
+		0x03 -	Account type
+		0x04 -	routing number
+		0x05 -	account number
+		0x06 -	SWIFT code
+		0x07 -	IBAN Number
+		0x08 -	Pin
+		0x09 -	Branch address
+		0x0A -	Branch phone
+		0xFD -	Note
+
+encryptionKeys:
+	key file
+		128 bit ID name AES128 encrypted with esp key
+		AES128/256 encryption key encrypted with esp key 
+
+
+Search file:
+	cryptate first (AES key length)/8 chars of name
+	organise the encrypted names by size (integer style)
+	all names is followed by file "name"
+	row 1 = uint32 amount of files pointed to by document
+
+
+
+
+
+
+
+
+
+
+
+
+______IRRELEVANT_____
+sizeof storage = 0x3B9A CA00 = 999 998 080 bits = 124 999 760 bytes 
+storage:
+	0x0000 0000 -> 0x0000 0780:
+		encryption keys for sending data (AES128) sorted by device specifik number (0-15)
+
+		size = 3B6C FBC0 = 996 998 080 bits(?) = 3 909 796 bytes
+	0x0000 00780 -> 0x3B6D 0340:
+3 bits data type: (NULL is 1 byte (8 bits) if not specified, pointer is 30 bits and is for the next set of data)
+
+0 | 0 | 0 = password: STX -> site -> DC1 -> password -> EOT
+0 | 0 | 1 = Secure note: STX -> noteName -> DC1 -> note -> EOT
+0 | 1 | 0 = Adress: STX Person name -> DC1 -> 4 bits what content != NULL 
+			-> data... == NULL -> EOT
+0 | 1 | 1 = Payment card: STX -> Name -> DC1 -> type(2 bits (Debit, kredit, custom, other)) -> vendor(3bits mastercard, visa, other(name -> NULL)) -> card num(54 bits) -> expiration date(4+8 bits) -> security code (10 bits) -> EOT
+1 | 0 | 0 = Gift card: STX -> Name -> DC1 -> type(1 bit, integer, String) -> data1 -> DC1 -> data2... -> EOT
+1 | 0 | 1 = Bank Acount: STX -> Name -> CR -> Bank Name -> SO -> Account type -> 
+		SI -> Routing Number -> DLE -> Account Number -> DC1 -> SWIFT code -> DC2 -> IBAND Number -> DC3 -> Pin -> EOT
+1 | 1 | 0 =
+1 | 1 | 1 =
+
+	(size = 0x57 B0F7 = 5 746 935 = 22 537 pointers)
+	 0x3B43 1909 -> 0x3B9A CA00:
+	 pointers to data sorted by name

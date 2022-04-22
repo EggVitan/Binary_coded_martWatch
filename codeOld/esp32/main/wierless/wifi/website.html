@@ -1,0 +1,34 @@
+<html>
+	<head>
+		<title>DO THE JAMMER, PLZ</title>
+	</head>
+
+	<body>
+		
+	</body>
+
+
+</html>
+
+          client.println("HTTP/1.1 200 OK"); //send new page
+          client.println("Content-Type: text/html");
+          client.println();
+
+          client.println("<HTML>");
+          client.println("<HEAD>");
+          client.println("<TITLE>Arduino GET test page</TITLE>");
+          client.println("</HEAD>");
+          client.println("<BODY>");
+
+          client.println("<H1>Zoomkat's simple Arduino button</H1>");
+          
+          client.println("<a href=\"/?on\" target=\"inlineframe\">ON</a>"); 
+          client.println("<a href=\"/?off\" target=\"inlineframe\">OFF</a>"); 
+
+          //client.println("<IFRAME name=inlineframe src=\"res://D:/WINDOWS/dnserror.htm\" width=1 height=1\">");
+          client.println("<IFRAME name=inlineframe style=\"display:none\" >");          
+          client.println("</IFRAME>");
+
+          client.println("</BODY>");
+          client.println("</HTML>");
+             }
