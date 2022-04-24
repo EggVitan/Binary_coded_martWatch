@@ -1,6 +1,7 @@
 //Tobias was here
 #include <Wire.h>
 #include "ds3231.h" // https://github.com/rodan/ds3231
+#define SLAVE_ADDR 0x69 //Nice number
 
 #define BUFF_MAX 128
 
@@ -34,4 +35,11 @@ void loop()
         
         prev = now;
     }
+}
+
+void binary_led_show(uint16_t data) {
+  // Send data to I2C slave device
+  Wire.beginTransmission(SLAVE_ADDR);
+  Wire.write(data);
+  Wire.endTransmission();
 }
