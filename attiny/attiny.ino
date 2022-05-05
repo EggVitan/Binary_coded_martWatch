@@ -1,29 +1,73 @@
 #include <Wire.h>
+#include "LowPower.h" // https://www.arduino.cc/en/Reference/ArduinoLowPower
 #define SLAVE_ADDR 0x69 //Nice number
+#define interruptPin x
 void timeAdd();
+void turnemon(uint16_t);
+void beforeWeAdd();
+uint16_t ledTime;
+uint16_t customDisplay;
+
+// The leds
+const int LED_PINS[] = {D1,D2,D3,D4,D5,D6,D7,D8,D9} //placeholder numbers for now
+//wait maybe
 
 void setup() {
   // Initaliz I2C communication as slave
   Wire.begin(SLAVE_ADDR);
   Wire.onReceive(receiveEvent);
-
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  
+  // A mimir
+  LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
 }
 
+// Recive stuff over I2C
 void receiveEvent(){
-  // Reads data from master
-  while (Wire.available() > 0) {
-    uint16_t data = Wire.read();
-  }
+  // invokes only once
+  static bool invoked;
+  if (invoked != 1) {
+    while (Wire.available() > 0) {
+      uint8_t firstByte = Wire.read();
+      uint8_t secondByte = Wire.read();
+      ledTime = (firstByte << 8) + secondByte;
+      invoked = 1;
+    }
+  } else {
+    while (Wire.available() > 0) {
+      uint8_t firstByte = Wire.read();
+      uint8_t secondByte = Wire.read();
+      customDisplay = (firstByte << 8) + secondByte;
+    }
+  // Cant have it looking for interrupts before ledTime gets defined.
+  attachInterrupt(interruptPin, beforeWeAdd, RISING); 
   // Turn on the appropriate LEDs
+  turnemon(ledTime);
+}
+
+void turnemon(uint16_t leds) {
+  int16_t andFilter = 0x0001; //0b 0000 0000 0000 0001
+  for(int i = 0; i < 16; i++) {
+    digitalWrite(LED_PINS[i], ledTime & andFilter);
+    andFilter << 1;
+  }
+}
+
+// Gets envoced every second, but only invokes timeAdd once per minute.
+void beforeWeAdd() {
+  static int8_t count;
+  count++;
+  if (count >= 60 ) {
+    timeAdd();
+    count = 0;
+
+    //If not running game
+    turnemon(ledTime);
+  }
 }
 
 // Stuff, idk
-uint16_t ledTime;
 void timeAdd()
 {
   namespace numbers
